@@ -1,0 +1,1 @@
+webpackJsonp([2],[function(e,t,s){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t.default={templates:{index:"./template.jsx",404:"./template.jsx"}}}]);

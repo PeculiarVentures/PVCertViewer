@@ -1,0 +1,1 @@
+webpackJsonp([1],[,function(e,a,l){"use strict";Object.defineProperty(a,"__esModule",{value:!0}),a.default={templates:{loading:"./loading.jsx"},langFile:"main"}}]);
