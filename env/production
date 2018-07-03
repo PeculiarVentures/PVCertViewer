@@ -1,7 +1,7 @@
 NODE_ENV=production
 URL=http://localhost
 PORT=3000
-GIT_URL=https://github.com/PeculiarVentures/PVCertViewer
+GIT_URL=https://peculiarventures.github.io/PVCertViewer
 
 ##### Deployment Configuration #####
 AWS_DEPLOY_BUCKET_NAME=name
