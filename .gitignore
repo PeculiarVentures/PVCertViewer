@@ -1,0 +1,10 @@
+.backup
+.DS_Store
+node_modules
+dst
+.idea
+.vscode
+*.log
+bundler/compiled_env.json
+package-lock.json
+*.sketch

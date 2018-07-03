@@ -1,0 +1,9 @@
+Certificate:
+  Part:
+    Basic: Basic Information
+    Fingerprint: Fingerprint
+    PublicKey: Public Key Info
+    Signature: Signature
+    Extensions: Extensions
+  More:
+    Title: More information

@@ -1,0 +1,21 @@
+.text
+  display: inline-block
+  vertical-align: top
+  width: calc(100% - 60px)
+  overflow: hidden
+  height: 20px
+  &.open
+    height: auto
+
+.button
+  width: 40px
+  margin-left: 20px
+  &.open
+    .icon
+      transform: rotate(-90deg)
+      margin-top: 1px
+
+.icon
+  width: 10px
+  transform: rotate(90deg)
+  margin-top: 4px

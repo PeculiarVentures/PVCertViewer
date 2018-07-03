@@ -1,0 +1,56 @@
+link_more_info
+  display: inline-block
+  transition: opacity 300ms
+  margin-top: 7px
+  &:first-child
+    margin-top: 0
+  &:hover
+    opacity: 0.7
+
+.text
+  display: inline-block
+
+.arrow
+  margin-left: 9px
+  width: 6px
+  display: inline-block
+
+.table
+  width: 100%
+  a
+    color: #3d7dff
+  td
+    vertical-align: top
+    padding: 4px 0
+    &:first-child
+      width: 150px
+      padding-right: 20px
+
+.title_td
+  padding: 84px 0 48px !important
+
+.empty_tr
+  height: 23px
+
+.icon_san_type
+  display: inline-block
+  vertical-align: top
+  width: 14px
+  margin-top: 3px
+
+.icon_subtree_type
+  display: inline-block
+  vertical-align: top
+  width: 12px
+  margin-top: 5px
+  margin-right: 4px
+
+@media (max-width: 760px)
+  .title_td
+    padding: 84px * .7 0 48px * .7 !important
+  .table
+    td
+      display: block
+      width: 100% !important
+      &:nth-child(2)
+        margin-bottom: 4px

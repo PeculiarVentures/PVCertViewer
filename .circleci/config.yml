@@ -1,0 +1,30 @@
+version: 2
+
+jobs:
+  build:
+    docker:
+      - image: circleci/node:8.9.3
+    steps:
+      - checkout
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
+      - run:
+          name: install-npm-dependencies
+          command: 'npm install'
+      - save_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
+          paths:
+            - ./node_modules
+      - run:
+          name: lint
+          command: 'npm run lint'
+      - deploy:
+          name: deploy
+          when: on_success
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              # Deploy to gh-pages
+              npm run deploy:gh-pages
+              # Deploy to AWS
+              # npm run deploy:aws
+            fi
