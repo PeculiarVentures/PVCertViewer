@@ -6,7 +6,7 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin'); // eslint-disa
 const md5File = require('md5-file'); // eslint-disable-line
 const path = require('path');
 const evaluate = require('eval');
-const { IntlWrapper } = require('pintl');
+const { IntlWrapper } = require('lib-pintl');
 const beautify = require('js-beautify');
 const uuid = require('./uuid').default;
 

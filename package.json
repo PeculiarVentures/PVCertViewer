@@ -1,6 +1,6 @@
 {
 	"name": "pv-cert-viewer",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"description": "",
 	"main": "index.js",
 	"scripts": {
@@ -35,10 +35,10 @@
 		"favicons": "^4.8.6",
 		"gh-pages": "^1.0.0",
 		"js-beautify": "^1.7.5",
-		"lib-pwa-engine": "git+https://github.com/pentatonica/lib-pwa-engine.git",
+		"lib-pwa-engine": "^0.0.9",
 		"lib-react-components": "git+ssh://git@github.com/pentatonica/lib-react-components.git#doc-loader",
 		"moment": "^2.22.2",
-		"pintl": "git+https://github.com/pentatonica/lib-react-intl.git",
+		"lib-pintl": "^0.0.2",
 		"pkijs": "^2.1.64",
 		"prop-types": "^15.6.0",
 		"pvtsutils": "^1.0.2",
@@ -93,5 +93,5 @@
 		"webpack-hot-middleware": "^2.20.0",
 		"yaml-loader": "^0.5.0"
 	},
-	"templatePWAVersion": "4f7cb25a9c42d0a8ab81a9c8a4f29e86bf324473"
+	"templatePWAVersion": "d4e59c846d2036dfccc3fcf83d313c873a26516c"
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { IntlWrapper } from 'pintl';
+import { IntlWrapper } from 'lib-pintl';
 
 const Viewport = props => (
   <IntlWrapper
