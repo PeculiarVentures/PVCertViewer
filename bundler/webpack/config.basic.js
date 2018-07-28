@@ -21,10 +21,6 @@ export default (mode) => {
           from: path.join(__dirname, `../../${CONFIG.SRC_FOLDER}/assets/static`),
           to: './assets',
         },
-        {
-          from: 'node_modules/lib-react-components/lib/themes/default.css',
-          to: './assets',
-        },
       ]),
     ],
     output: {
