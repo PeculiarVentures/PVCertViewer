@@ -2,6 +2,9 @@ version: 2
 
 jobs:
   build:
+    branches:
+      ignore:
+        - gh-pages
     docker:
       - image: circleci/node:8.9.3
     steps:
@@ -25,6 +28,4 @@ jobs:
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
               # Deploy to gh-pages
               npm run deploy:gh-pages
-              # Deploy to AWS
-              # npm run deploy:aws
             fi

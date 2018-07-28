@@ -8,15 +8,20 @@ import s from './styles/expand_text.sass';
 export default class ExpandText extends Component {
   static propTypes = {
     children: PropTypes.node.isRequired,
-  };
+  }
+
+  static contextTypes = {
+    theme: PropTypes.object,
+  }
 
   state = {
     open: false,
-  };
+  }
 
   render() {
     const { children } = this.props;
     const { open } = this.state;
+    const { theme } = this.context;
 
     return (
       <Fragment>
@@ -43,7 +48,7 @@ export default class ExpandText extends Component {
           <ArrowRightIcon
             className={classNames(
               s.icon,
-              'aui_fill_white',
+              theme.fill_white,
             )}
           />
         </Button>

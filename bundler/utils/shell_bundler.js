@@ -5,9 +5,9 @@ const webpack = require('webpack'); // eslint-disable-line
 const ExtractTextPlugin = require('extract-text-webpack-plugin'); // eslint-disable-line
 const md5File = require('md5-file'); // eslint-disable-line
 const path = require('path');
-const evaluate = require('eval');
-const { IntlWrapper } = require('lib-pintl');
-const beautify = require('js-beautify');
+const evaluate = require('eval'); // eslint-disable-line
+const { IntlWrapper } = require('lib-pintl'); // eslint-disable-line
+const beautify = require('js-beautify'); // eslint-disable-line
 const uuid = require('./uuid').default;
 
 const beautifyHtml = beautify.html;
@@ -75,7 +75,6 @@ function prepareConfig(resolve, extractSASS, entry, outputPath) {
                   importLoaders: 1,
                   modules: true,
                   localIdentName: '[local]_[hash:base64:5]',
-                  minimize: true,
                 },
               },
             ],
@@ -86,15 +85,8 @@ function prepareConfig(resolve, extractSASS, entry, outputPath) {
           use: extractSASS.extract({
             fallback: 'style-loader',
             use: [
-              {
-                loader: 'css-loader',
-                options: {
-                  minimize: true,
-                },
-              },
-              {
-                loader: 'sass-loader',
-              },
+              'css-loader',
+              'sass-loader',
             ],
           }),
         },
@@ -104,25 +96,10 @@ function prepareConfig(resolve, extractSASS, entry, outputPath) {
           use: extractSASS.extract({
             fallback: 'style-loader',
             use: [
-              {
-                loader: 'css-loader',
-                options: {
-                  importLoaders: 1,
-                  modules: true,
-                  localIdentName: '[local]_[hash:base64:5]',
-                  minimize: true,
-                },
-              },
-              {
-                loader: 'sass-loader',
-              },
+              'css-loader?modules&importLoaders=1&localIdentName=[local]_[hash:base64:5]&minimize=true',
+              'sass-loader',
             ],
           }),
-        },
-        {
-          test: /\.(glsl|frag|vert)$/,
-          loader: 'raw-loader',
-          exclude: /node_modules/,
         },
       ],
     },
@@ -221,6 +198,7 @@ class ShellBundler {
       }
 
       const applyPluginsAsyncWaterfall = this.applyPluginsAsyncWaterfall(compilation);
+
       // add files to compilation fileDependencies
       Object.keys(templatesEntry).forEach((t) => {
         if (compilation.fileDependencies.add) {
@@ -249,11 +227,7 @@ class ShellBundler {
           const arr = [];
 
           Object.keys(templatesEntry).forEach((name) => {
-            const outputCss = assets[`${name}.css`] || {
-              name,
-              source: () => '',
-              size: () => 0,
-            };
+            const outputCss = assets[`${name}.css`];
             const outputJs = assets[`${name}.js`];
 
             if (!cssToProps) {
@@ -302,7 +276,7 @@ class ShellBundler {
         .then(() => callback())
         .catch((error) => {
           compilation.errors.push(new Error(error));
-          callback();
+          throw error;
         });
     });
   }
@@ -315,8 +289,10 @@ class ShellBundler {
     if (compilation.hooks) {
       return (eventName, requiresResult, pluginArgs) => {
         const ccEventName = trainCaseToCamelCase(eventName);
+
         if (!compilation.hooks[ccEventName]) {
           compilation.errors.push(new Error(`No hook found for ${eventName}`));
+          throw new Error(`No hook found for ${eventName}`);
         }
 
         return compilation.hooks[ccEventName].promise(pluginArgs);

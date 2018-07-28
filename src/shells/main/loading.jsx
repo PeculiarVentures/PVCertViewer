@@ -1,6 +1,11 @@
 import React from 'react';
-import { CircularProgress } from 'lib-react-components';
+import { CircularProgress, ThemeProvider } from 'lib-react-components';
+import theme from 'lib-react-components/lib/themes/default.css';
 
-const RootShell = () => <CircularProgress />;
+const RootShell = () => (
+  <ThemeProvider theme={theme}>
+    <CircularProgress />
+  </ThemeProvider>
+);
 
 export default RootShell;
