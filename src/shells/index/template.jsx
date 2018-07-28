@@ -1,6 +1,7 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { CircularProgress } from 'lib-react-components';
+import { CircularProgress, ThemeProvider } from 'lib-react-components';
+import theme from 'lib-react-components/lib/themes/default.css';
 import Noscript from './noscript';
 import * as CONFIG from '../../../bundler/config';
 import s from './styles/basic.sass';
@@ -14,10 +15,8 @@ const RootShell = props => (
       <title>
         {props.title}
       </title>
-      <link rel="preload" href={`${CONFIG.GIT_URL}/assets/default.css`} as="style" />
       <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600&amp;subset=cyrillic" rel="stylesheet" />
       <style dangerouslySetInnerHTML={{ __html: props.inlineStyles }} />
-      <link href={`${CONFIG.GIT_URL}/assets/default.css`} rel="stylesheet" />
       {props.initRollbar && (
         <Fragment>
           <script
@@ -48,7 +47,9 @@ const RootShell = props => (
     </head>
     <body>
       <div className={s.root} id="root">
-        <CircularProgress />
+        <ThemeProvider theme={theme}>
+          <CircularProgress />
+        </ThemeProvider>
       </div>
       {props.disableReactDevTools && (
         <script
