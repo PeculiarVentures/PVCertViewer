@@ -18,6 +18,7 @@ export default class Viewer extends Component {
 
   static contextTypes = {
     intl: PropTypes.object,
+    theme: PropTypes.object,
   };
 
   static defaultProps = {
@@ -152,7 +153,9 @@ export default class Viewer extends Component {
     )));
   }
 
-  renderExtSAN(extension) { // eslint-disable-line
+  renderExtSAN(extension) {
+    const { theme } = this.context;
+
     return Viewer.renderInfoRow('Value', extension.value.map((p) => {
       const {
         typeValue,
@@ -208,21 +211,21 @@ export default class Viewer extends Component {
               <AcceptIcon
                 className={classNames(
                   s.icon_subtree_type,
-                  'aui_fill_success',
+                  theme.fill_success,
                 )}
               />
             ) : (
               <CancelIcon
                 className={classNames(
                   s.icon_subtree_type,
-                  'aui_fill_wrong',
+                  theme.fill_wrong,
                 )}
               />
             ))}
             <EarthIcon
               className={classNames(
                 s.icon_san_type,
-                'aui_fill_black',
+                theme.fill_black,
               )}
             />
           </span>
