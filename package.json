@@ -36,7 +36,7 @@
 		"gh-pages": "^1.0.0",
 		"js-beautify": "^1.7.5",
 		"lib-pwa-engine": "^0.0.9",
-		"lib-react-components": "^0.0.28",
+		"lib-react-components": "0.1.0",
 		"moment": "^2.22.2",
 		"lib-pintl": "^0.0.2",
 		"pkijs": "^2.1.64",
