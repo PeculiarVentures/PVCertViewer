@@ -2,7 +2,7 @@ import * as asn1js from 'asn1js';
 import Certificate from 'pkijs/build/Certificate';
 import CertificationRequest from 'pkijs/build/CertificationRequest';
 import { Convert } from 'pvtsutils';
-import moment from 'moment';
+import dayJs from 'dayjs';
 import OIDS from '../constants/oids';
 import logList from '../constants/log_list.json';
 
@@ -579,23 +579,25 @@ ${string.replace(/(.{64})/g, '$1 \n')}
       const version = certificateJson.version;
 
       // decode notBefore date
-      const notBefore = certificateJson.notBefore && certificateJson.notBefore.value
-        ? moment(certificateJson.notBefore.value).format('LLLL')
-        : '';
+      let notBefore;
+
+      if (certificateJson.notBefore && certificateJson.notBefore.value) {
+        notBefore = dayJs(certificateJson.notBefore.value).toString();
+      }
 
       // decode notAfter date
-      const notAfter = certificateJson.notAfter && certificateJson.notAfter.value
-        ? moment(certificateJson.notAfter.value).format('LLLL')
-        : '';
+      let notAfter;
+
+      if (certificateJson.notAfter && certificateJson.notAfter.value) {
+        notAfter = dayJs(certificateJson.notAfter.value).toString();
+      }
 
       // get days diff
-      const validity = (
-        certificateJson.notBefore
-        && certificateJson.notBefore.value
-        && certificateJson.notAfter
-        && certificateJson.notAfter.value
-      ) ? moment(certificateJson.notAfter.value).diff(certificateJson.notBefore.value, 'days')
-        : 0;
+      let validity;
+
+      if (notBefore && notAfter) {
+        validity = dayJs(certificateJson.notAfter.value).diff(certificateJson.notBefore.value, 'days');
+      }
 
       // get isRoot
       const isRoot = JSON.stringify(issuer) === JSON.stringify(subject);
@@ -738,7 +740,7 @@ ${string.replace(/(.{64})/g, '$1 \n')}
                   return {
                     logID: t.logID,
                     logName: logName.length > 0 ? logName[0].description : '',
-                    timestamp: moment(t.timestamp).format('LLLL'),
+                    timestamp: dayJs(t.timestamp).toString(),
                     signature: t.signature.valueBeforeDecode,
                     hashAlgorithm: t.hashAlgorithm,
                     signatureAlgorithm: t.signatureAlgorithm,

@@ -432,7 +432,7 @@ export default class Viewer extends Component {
             {Viewer.renderInfoRow('Version', source.version)}
             {Viewer.renderInfoRow('Issued', source.notBefore)}
             {Viewer.renderInfoRow('Expired', source.notAfter)}
-            {Viewer.renderInfoRow('Validity', `${source.validity} days`)}
+            {Viewer.renderInfoRow('Validity', source.validity ? `${source.validity} days` : undefined)}
 
             {Viewer.renderTitle(intl.getText('Certificate.Part.PublicKey'))}
             {Viewer.renderInfoRow('Algorithm', source.publicKey.algorithm.name)}
