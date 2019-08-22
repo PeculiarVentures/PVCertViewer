@@ -16,26 +16,13 @@ export default class MainContainer extends Component {
 
     if (parsedQuery.cert) {
       this.certFromQuery = parsedQuery.cert;
+    } else {
+      this.certFromQuery = defaultCert;
     }
   }
 
   componentDidMount() {
-    const { certFromQuery } = this;
-
-    if (certFromQuery) {
-      const decoded = CertHelper.decodeCert(certFromQuery);
-
-      if (!decoded) {
-        alert('Certificate decode error');
-        return false;
-      }
-
-      this.setState({ // eslint-disable-line
-        decoded,
-      });
-    }
-
-    return false;
+    this.onHandleClick();
   }
 
   onHandleClick = () => {

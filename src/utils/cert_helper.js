@@ -1,5 +1,6 @@
 import * as asn1js from 'asn1js';
 import Certificate from 'pkijs/build/Certificate';
+import CertificationRequest from 'pkijs/build/CertificationRequest';
 import { Convert } from 'pvtsutils';
 import moment from 'moment';
 import OIDS from '../constants/oids';
@@ -7,6 +8,17 @@ import logList from '../constants/log_list.json';
 
 // RegExp for base64
 const base64RegExp = /([A-Za-z0-9+\/=\s]+)|begin-base64[^\n]+\n([A-Za-z0-9+\/=\s]+)====/; // eslint-disable-line
+
+const flatten = arr => (
+  arr.reduce(
+    (flat, toFlatten) => flat.concat(
+      Array.isArray(toFlatten)
+        ? flatten(toFlatten)
+        : toFlatten,
+    ),
+    [],
+  )
+);
 
 // OIDs list for decode subject and issuer
 const OID = {
@@ -147,6 +159,53 @@ const CertHelper = {
       return usages;
     },
 
+    keyUsageAttr: function keyUsageAttr(hex, unusedBits) {
+      const usages = [];
+      // parse key usage BitString
+      const valueHex = new Uint8Array(Convert.FromHex(hex));
+      // const unusedBits = bits;
+      let keyUsageByte1 = valueHex[0];
+      let keyUsageByte2 = valueHex.byteLength > 1 ? valueHex[1] : 0;
+
+      if (valueHex.byteLength === 1) {
+        keyUsageByte1 >>= unusedBits;
+        keyUsageByte1 <<= unusedBits;
+      }
+      if (valueHex.byteLength === 2) {
+        keyUsageByte2 >>= unusedBits;
+        keyUsageByte2 <<= unusedBits;
+      }
+      if (keyUsageByte1 & 0x80) {
+        usages.push('Digital Signature');
+      }
+      if (keyUsageByte1 & 0x40) {
+        usages.push('Non Repudiation');
+      }
+      if (keyUsageByte1 & 0x20) {
+        usages.push('Key Encipherment');
+      }
+      if (keyUsageByte1 & 0x10) {
+        usages.push('Data Encipherment');
+      }
+      if (keyUsageByte1 & 0x08) {
+        usages.push('Key Agreement');
+      }
+      if (keyUsageByte1 & 0x04) {
+        usages.push('Key Cert Sign');
+      }
+      if (keyUsageByte1 & 0x02) {
+        usages.push('cRL Sign');
+      }
+      if (keyUsageByte1 & 0x01) {
+        usages.push('Encipher Only');
+      }
+      if (keyUsageByte2 & 0x80) {
+        usages.push('Decipher Only');
+      }
+
+      return usages;
+    },
+
     netscapeCertType: function netscapeCertType(extension) {
       const usages = [];
       // parse key usage BitString
@@ -198,6 +257,77 @@ const CertHelper = {
   },
 
   /**
+   * Decode CSR attribute value
+   * @param {val} object
+   * @returns {object|string}
+   */
+  decodeAttributeValue: function decodeAttributeValue(val) {
+    if (!val) {
+      return null;
+    }
+
+    if (
+      val.blockName === 'IA5String'
+      || val.blockName === 'ObjectIdentifier'
+    ) {
+      return {
+        name: OIDS[val.valueBlock.value] || val.valueBlock.value,
+        oid: val.valueBlock.value,
+        value: undefined,
+      };
+    }
+
+    if (val.blockName === 'Sequence') {
+      let temp;
+
+      if (val.valueBlock.value[0] && val.valueBlock.value[0].blockName === 'ObjectIdentifier') {
+        temp = decodeAttributeValue(val.valueBlock.value[0]);
+
+        const valueBlock = val.valueBlock.value.find(v => v.blockName === 'OctetString');
+
+        if (valueBlock) {
+          const attrValue = decodeAttributeValue(valueBlock);
+
+          // Key Usage
+          if (temp.oid === '2.5.29.15') {
+            temp.value = CertHelper.Extensions.keyUsageAttr(
+              attrValue,
+              Number(attrValue),
+            );
+          } else {
+            temp.value = attrValue;
+          }
+        }
+
+        return temp;
+      }
+
+      return val.valueBlock.value.map(v => decodeAttributeValue(v));
+    }
+
+    if (val.blockName === 'Integer') {
+      return val.valueBlock.valueDec;
+    }
+
+    if (
+      val.blockName === 'Utf8String'
+      || val.blockName === 'BmpString'
+      || val.blockName === 'BitString'
+      || val.blockName === 'OctetString'
+    ) {
+      return val.valueBlock.value.length
+        ? val.valueBlock.value
+        : val.valueBlock.valueHex;
+    }
+
+    if (val.blockName === 'Boolean') {
+      return val.valueBlock.value;
+    }
+
+    return `need decode: ${val.blockName}`;
+  },
+
+  /**
    * Add space symbol after all second charset
    * @param {string} string
    * @returns {string}
@@ -217,6 +347,10 @@ const CertHelper = {
    * }}
    */
   prepareAlgorithm: function prepareAlgorithm(pkiAlg) {
+    if (!pkiAlg) {
+      return null;
+    }
+
     switch (pkiAlg.algorithmId) {
       case '1.2.840.113549.1.1.5':
         return {
@@ -278,6 +412,10 @@ ${string.replace(/(.{64})/g, '$1 \n')}
   },
 
   decodeIssuerSubject: function decodeIssuerSubject(obj) {
+    if (!obj || !obj.typesAndValues) {
+      return [];
+    }
+
     return obj.typesAndValues.map(({ type, value }) => {
       const oid = OID[type.toString()];
       const name = typeof oid === 'object' ? oid.short : '';
@@ -374,19 +512,26 @@ ${string.replace(/(.{64})/g, '$1 \n')}
 
       // prepare source value to ArrayBuffer
       if (base64RegExp.test(source)) { // pem
-        value = Convert.FromBinary(window.atob(source.replace(/(-----(BEGIN|END) CERTIFICATE-----|\r|\n)/g, '')));
+        value = Convert.FromBinary(window.atob(source.replace(/(-----(BEGIN|END) CERTIFICATE( REQUEST|)-----|\r|\n)/g, '')));
         sourceType = 'pem';
       } else if (/[a-f\d]/ig.test(source)) { // hex
         value = Convert.FromHex(source.replace(/(\r|\n|\s)/g, ''));
         sourceType = 'hex';
-      } else { // der
+      } else {
         value = Convert.FromBinary(source);
         sourceType = 'der';
       }
 
       // decode ArrayBuffer
       const asn1 = asn1js.fromBER(value);
-      const certificate = new Certificate({ schema: asn1.result });
+      let certificate;
+
+      try {
+        certificate = new Certificate({ schema: asn1.result });
+      } catch (err) {
+        certificate = new CertificationRequest({ schema: asn1.result });
+      }
+
       const certificateJson = certificate.toJSON();
 
       // decode issuer
@@ -420,26 +565,36 @@ ${string.replace(/(.{64})/g, '$1 \n')}
 
       // decode signature
       const signature = {
-        algorithm: this.prepareAlgorithm(certificateJson.signature),
+        algorithm: this.prepareAlgorithm(certificateJson.signatureAlgorithm),
         value: certificateJson.signatureValue.valueBlock.valueHex.toLowerCase(),
-        oid: certificateJson.signature.algorithmId,
+        oid: certificateJson.signatureAlgorithm.algorithmId,
       };
 
       // get serial number
-      const serialNumber = certificateJson.serialNumber.valueBlock.valueHex.toLowerCase();
+      const serialNumber = certificateJson.serialNumber
+        ? certificateJson.serialNumber.valueBlock.valueHex.toLowerCase()
+        : null;
 
       // get version
       const version = certificateJson.version;
 
       // decode notBefore date
-      const notBefore = certificateJson.notBefore.value ? moment(certificateJson.notBefore.value).format('LLLL') : '';
+      const notBefore = certificateJson.notBefore && certificateJson.notBefore.value
+        ? moment(certificateJson.notBefore.value).format('LLLL')
+        : '';
 
       // decode notAfter date
-      const notAfter = certificateJson.notAfter.value ? moment(certificateJson.notAfter.value).format('LLLL') : '';
+      const notAfter = certificateJson.notAfter && certificateJson.notAfter.value
+        ? moment(certificateJson.notAfter.value).format('LLLL')
+        : '';
 
       // get days diff
-      const validity = certificateJson.notBefore.value && certificateJson.notAfter.value
-        ? moment(certificateJson.notAfter.value).diff(certificateJson.notBefore.value, 'days')
+      const validity = (
+        certificateJson.notBefore
+        && certificateJson.notBefore.value
+        && certificateJson.notAfter
+        && certificateJson.notAfter.value
+      ) ? moment(certificateJson.notAfter.value).diff(certificateJson.notBefore.value, 'days')
         : 0;
 
       // get isRoot
@@ -602,7 +757,28 @@ ${string.replace(/(.{64})/g, '$1 \n')}
         });
       }
 
-      return {
+      // decode attributes
+      const attributes = [];
+
+      if (certificateJson.attributes) {
+        certificateJson.attributes.forEach((attr) => {
+          const attribute = {
+            name: OIDS[attr.type] || attr.type,
+            oid: attr.type,
+            value: [],
+          };
+
+          try {
+            attribute.value = flatten(attr.values.map(val => this.decodeAttributeValue(val)));
+          } catch (error) {
+            console.error('Decode attribute error:', error);
+          }
+
+          attributes.push(attribute);
+        });
+      }
+
+      const parsed = {
         issuer,
         subject,
         publicKey,
@@ -617,7 +793,10 @@ ${string.replace(/(.{64})/g, '$1 \n')}
         sourceType,
         source,
         extensions,
+        attributes,
       };
+
+      return parsed;
     } catch (error) {
       console.error('Decode certificate error:', error);
       return false;
