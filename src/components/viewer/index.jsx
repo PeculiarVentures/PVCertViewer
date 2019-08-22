@@ -157,6 +157,180 @@ export default class Viewer extends Component {
     )));
   }
 
+  static renderExtCRLDistributionPoints(extension) {
+    return Viewer.renderInfoRow('Paths', extension.value.map(p => (
+      <a
+        href={p.value}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {p.value}
+      </a>
+    )));
+  }
+
+  static renderExtCertificateTransparency(extension) {
+    return Viewer.renderInfoRow('Value', extension.value.map(t => (
+      <span>
+        {t.logName} ({t.timestamp})
+      </span>
+    )));
+  }
+
+  static prepareAttributeValue(value) {
+    if (!value) {
+      return null;
+    }
+
+    if (Array.isArray(value)) {
+      return value.map(v => Viewer.prepareAttributeValue(v));
+    }
+
+    if (typeof value === 'object') {
+      if (value.oid && value.value) {
+        return value;
+      }
+
+      return JSON.stringify(value);
+    }
+
+    return value;
+  }
+
+  renderExtensions(extensions) {
+    const { intl } = this.context;
+
+    if (!extensions || !extensions.length) {
+      return null;
+    }
+
+    return (
+      <Fragment>
+        {Viewer.renderTitle(intl.getText('Certificate.Part.Extensions'))}
+        {extensions.map((extension, index) => {
+          let extendedData = [];
+
+          if (typeof extension.value === 'string') {
+            extendedData = Viewer.renderInfoRow('Value', extension.value);
+          }
+
+          if (extension.value.length && Array.isArray(extension.value) && typeof extension.value[0] === 'string') {
+            extendedData = Viewer.renderInfoRow('Value', extension.value.join(', '));
+          }
+
+          switch (extension.oid) {
+            // Basic Constraints
+            case '2.5.29.19':
+              extendedData = Viewer.renderExtBasicConstraints(extension);
+              break;
+            // Extended Key Usage
+            case '2.5.29.37':
+              extendedData = Viewer.renderExtExtendedKeyUsage(extension);
+              break;
+            // Authority Key Identifier
+            case '2.5.29.35':
+              extendedData = Viewer.renderExtAuthorityKeyIdentifier(extension);
+              break;
+            // Certificate Policies
+            case '2.5.29.32':
+              extendedData = Viewer.renderExtCertificatePolicies(extension);
+              break;
+            // Certificate Authority Information Access
+            case '1.3.6.1.5.5.7.1.1':
+              extendedData = Viewer.renderExtCertificateAuthorityInformationAccess(extension);
+              break;
+            // Subject Alternative Name
+            // Name Constraints
+            case '2.5.29.17':
+            case '2.5.29.30':
+              extendedData = this.renderExtSAN(extension);
+              break;
+            // CRL Distribution Points
+            case '2.5.29.31':
+              extendedData = Viewer.renderExtCRLDistributionPoints(extension);
+              break;
+            // Certificate Transparency
+            case '1.3.6.1.4.1.11129.2.4.2':
+              extendedData = Viewer.renderExtCertificateTransparency(extension);
+              break;
+
+            default:
+              break;
+          }
+
+          return ( // eslint-disable-next-line
+            <Fragment key={index}>
+              {Viewer.renderInfoRow('Name', extension.name ? `${extension.name} (${extension.oid})` : extension.oid)}
+              {Viewer.renderInfoRow('Critical', extension.critical ? 'Yes' : 'No')}
+              {extendedData}
+              <tr className={s.empty_tr} />
+            </Fragment>
+          );
+        })}
+      </Fragment>
+    );
+  }
+
+  renderAttributes(attributes) {
+    const { intl } = this.context;
+
+    if (!attributes || !attributes.length) {
+      return null;
+    }
+
+    return (
+      <Fragment>
+        {Viewer.renderTitle(intl.getText('Certificate.Part.Attributes'))}
+        {attributes.map((attribute, index) => {
+          let extendedData = null;
+
+          if (typeof attribute.value === 'string' || typeof attribute.value === 'number') {
+            extendedData = Viewer.renderInfoRow(
+              'Value',
+              attribute.value,
+            );
+          }
+
+          if (!extendedData) {
+            switch (attribute.oid) {
+              // Extension Request
+              case '1.2.840.113549.1.9.14':
+                extendedData = Viewer.renderInfoRow(
+                  'Extensions',
+                  Viewer.prepareAttributeValue(attribute.value).map(val => (
+                    <Fragment>
+                      {val.name ? `${val.name} (${val.oid})` : val.oid}
+                      <br />
+                      <span style={{ fontFamily: 'monospace' }}>
+                        {val.value}
+                      </span>
+                      <br />
+                    </Fragment>
+                  )),
+                );
+
+                break;
+
+              default:
+                extendedData = Viewer.renderInfoRow(
+                  'Value',
+                  Viewer.prepareAttributeValue(attribute.value),
+                );
+            }
+          }
+
+          return ( // eslint-disable-next-line
+            <Fragment key={index}>
+              {Viewer.renderInfoRow('Name', attribute.name ? `${attribute.name} (${attribute.oid})` : attribute.oid)}
+              {extendedData}
+              <tr className={s.empty_tr} />
+            </Fragment>
+          );
+        })}
+      </Fragment>
+    );
+  }
+
   renderExtSAN(extension) {
     const { theme } = this.context;
 
@@ -239,176 +413,6 @@ export default class Viewer extends Component {
     }));
   }
 
-  static renderExtCRLDistributionPoints(extension) {
-    return Viewer.renderInfoRow('Paths', extension.value.map(p => (
-      <a
-        href={p.value}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        {p.value}
-      </a>
-    )));
-  }
-
-  static renderExtCertificateTransparency(extension) {
-    return Viewer.renderInfoRow('Value', extension.value.map(t => (
-      <span>
-        {t.logName} ({t.timestamp})
-      </span>
-    )));
-  }
-
-  static renderExtensions(extensions, intl) {
-    if (!extensions || !extensions.length) {
-      return null;
-    }
-
-    return (
-      <Fragment>
-        {Viewer.renderTitle(intl.getText('Certificate.Part.Extensions'))}
-        {extensions.map((extension, index) => {
-          let extendedData = [];
-
-          if (typeof extension.value === 'string') {
-            extendedData = Viewer.renderInfoRow('Value', extension.value);
-          }
-
-          if (extension.value.length && Array.isArray(extension.value) && typeof extension.value[0] === 'string') {
-            extendedData = Viewer.renderInfoRow('Value', extension.value.join(', '));
-          }
-
-          switch (extension.oid) {
-            // Basic Constraints
-            case '2.5.29.19':
-              extendedData = Viewer.renderExtBasicConstraints(extension);
-              break;
-            // Extended Key Usage
-            case '2.5.29.37':
-              extendedData = Viewer.renderExtExtendedKeyUsage(extension);
-              break;
-            // Authority Key Identifier
-            case '2.5.29.35':
-              extendedData = Viewer.renderExtAuthorityKeyIdentifier(extension);
-              break;
-            // Certificate Policies
-            case '2.5.29.32':
-              extendedData = Viewer.renderExtCertificatePolicies(extension);
-              break;
-            // Certificate Authority Information Access
-            case '1.3.6.1.5.5.7.1.1':
-              extendedData = Viewer.renderExtCertificateAuthorityInformationAccess(extension);
-              break;
-            // Subject Alternative Name
-            // Name Constraints
-            case '2.5.29.17':
-            case '2.5.29.30':
-              extendedData = this.renderExtSAN(extension);
-              break;
-            // CRL Distribution Points
-            case '2.5.29.31':
-              extendedData = Viewer.renderExtCRLDistributionPoints(extension);
-              break;
-            // Certificate Transparency
-            case '1.3.6.1.4.1.11129.2.4.2':
-              extendedData = Viewer.renderExtCertificateTransparency(extension);
-              break;
-
-            default:
-              break;
-          }
-
-          return ( // eslint-disable-next-line
-            <Fragment key={index}>
-              {Viewer.renderInfoRow('Name', extension.name ? `${extension.name} (${extension.oid})` : extension.oid)}
-              {Viewer.renderInfoRow('Critical', extension.critical ? 'Yes' : 'No')}
-              {extendedData}
-              <tr className={s.empty_tr} />
-            </Fragment>
-          );
-        })}
-      </Fragment>
-    );
-  }
-
-  static prepareAttributeValue(value) {
-    if (!value) {
-      return null;
-    }
-
-    if (Array.isArray(value)) {
-      return value.map(v => Viewer.prepareAttributeValue(v));
-    }
-
-    if (typeof value === 'object') {
-      if (value.oid && value.value) {
-        return value;
-      }
-
-      return JSON.stringify(value);
-    }
-
-    return value;
-  }
-
-  static renderAttributes(attributes, intl) {
-    if (!attributes || !attributes.length) {
-      return null;
-    }
-
-    return (
-      <Fragment>
-        {Viewer.renderTitle(intl.getText('Certificate.Part.Attributes'))}
-        {attributes.map((attribute, index) => {
-          let extendedData = null;
-
-          if (typeof attribute.value === 'string' || typeof attribute.value === 'number') {
-            extendedData = Viewer.renderInfoRow(
-              'Value',
-              attribute.value,
-            );
-          }
-
-          if (!extendedData) {
-            switch (attribute.oid) {
-              // Extension Request
-              case '1.2.840.113549.1.9.14':
-                extendedData = Viewer.renderInfoRow(
-                  'Extensions',
-                  Viewer.prepareAttributeValue(attribute.value).map(val => (
-                    <Fragment>
-                      {val.name ? `${val.name} (${val.oid})` : val.oid}
-                      <br />
-                      <span style={{ fontFamily: 'monospace' }}>
-                        {val.value}
-                      </span>
-                      <br />
-                    </Fragment>
-                  )),
-                );
-
-                break;
-
-              default:
-                extendedData = Viewer.renderInfoRow(
-                  'Value',
-                  Viewer.prepareAttributeValue(attribute.value),
-                );
-            }
-          }
-
-          return ( // eslint-disable-next-line
-            <Fragment key={index}>
-              {Viewer.renderInfoRow('Name', attribute.name ? `${attribute.name} (${attribute.oid})` : attribute.oid)}
-              {extendedData}
-              <tr className={s.empty_tr} />
-            </Fragment>
-          );
-        })}
-      </Fragment>
-    );
-  }
-
   render() {
     const { source } = this.props;
     const { intl } = this.context;
@@ -454,8 +458,8 @@ export default class Viewer extends Component {
               { monospace: true },
             )}
 
-            {Viewer.renderExtensions(source.extensions, intl)}
-            {Viewer.renderAttributes(source.attributes, intl)}
+            {this.renderExtensions(source.extensions)}
+            {this.renderAttributes(source.attributes)}
           </tbody>
         </table>
       </Fragment>
