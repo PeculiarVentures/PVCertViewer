@@ -314,6 +314,7 @@ const CertHelper = {
       || val.blockName === 'BmpString'
       || val.blockName === 'BitString'
       || val.blockName === 'OctetString'
+      || val.blockName === 'PrintableString'
     ) {
       return val.valueBlock.value.length
         ? val.valueBlock.value
