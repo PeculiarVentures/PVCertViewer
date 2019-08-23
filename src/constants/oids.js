@@ -1046,6 +1046,7 @@ export default {
   '1.3.6.1.4.1.311.21.5': 'Ca Exchange',
   '1.3.6.1.4.1.311.21.6': 'Key Recovery',
   '1.3.6.1.4.1.311.21.7': 'Certificate Template',
+  '1.3.6.1.4.1.311.21.8': 'Enterprize OID Root',
   '1.3.6.1.4.1.311.21.9': 'Rdn Dummy Signer',
   '1.3.6.1.4.1.311.21.10': 'Application Cert Policies',
   '1.3.6.1.4.1.311.21.11': 'Application Policy Mappings',

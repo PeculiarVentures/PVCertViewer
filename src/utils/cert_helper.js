@@ -271,7 +271,7 @@ const CertHelper = {
       || val.blockName === 'ObjectIdentifier'
     ) {
       return {
-        name: OIDS[val.valueBlock.value] || val.valueBlock.value,
+        name: OIDS[val.valueBlock.value],
         oid: val.valueBlock.value,
         value: undefined,
       };
@@ -612,7 +612,7 @@ ${string.replace(/(.{64})/g, '$1 \n')}
       if (certificateJson.extensions) {
         certificateJson.extensions.forEach((ext) => {
           const extension = {
-            name: OIDS[ext.extnID] || ext.extnID,
+            name: OIDS[ext.extnID],
             oid: ext.extnID,
             critical: ext.critical || false,
             value: [],
@@ -766,7 +766,7 @@ ${string.replace(/(.{64})/g, '$1 \n')}
       if (certificateJson.attributes) {
         certificateJson.attributes.forEach((attr) => {
           const attribute = {
-            name: OIDS[attr.type] || attr.type,
+            name: OIDS[attr.type],
             oid: attr.type,
             value: [],
           };
