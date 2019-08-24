@@ -2,6 +2,7 @@ import * as asn1js from 'asn1js';
 import Certificate from 'pkijs/build/Certificate';
 import CertificationRequest from 'pkijs/build/CertificationRequest';
 import { Convert } from 'pvtsutils';
+import { regExps } from 'lib-react-components';
 import dayJs from 'dayjs';
 import OIDS from '../constants/oids';
 import logList from '../constants/log_list.json';
@@ -512,12 +513,12 @@ ${string.replace(/(.{64})/g, '$1 \n')}
       let value;
 
       // prepare source value to ArrayBuffer
-      if (base64RegExp.test(source)) { // pem
-        value = Convert.FromBinary(window.atob(source.replace(/(-----(BEGIN|END) CERTIFICATE( REQUEST|)-----|\r|\n)/g, '')));
-        sourceType = 'pem';
-      } else if (/[a-f\d]/ig.test(source)) { // hex
+      if (regExps.hex.test(source)) {
         value = Convert.FromHex(source.replace(/(\r|\n|\s)/g, ''));
         sourceType = 'hex';
+      } else if (base64RegExp.test(source)) {
+        value = Convert.FromBase64(source.replace(new RegExp(regExps.cert, 'g'), ''));
+        sourceType = 'pem';
       } else {
         value = Convert.FromBinary(source);
         sourceType = 'der';
