@@ -38,7 +38,7 @@
 		"js-beautify": "^1.7.5",
 		"lib-pintl": "^0.0.2",
 		"lib-pwa-engine": "^0.0.9",
-		"lib-react-components": "0.1.0",
+		"lib-react-components": "0.3.48",
 		"pkijs": "^2.1.64",
 		"prop-types": "^15.6.0",
 		"pvtsutils": "^1.0.2",

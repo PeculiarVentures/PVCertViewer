@@ -28,6 +28,9 @@ const scriptSourceToSourceHtml = (doctype, sourceJs, sourceCss = '', props = {},
   let render;
 
   try {
+    global.Element = typeof Element === "undefined" ? function() {} : Element; // eslint-disable-line
+    global.HTMLElement = typeof HTMLElement === "undefined" ? function() {} : HTMLElement; // eslint-disable-line
+
     template = evaluate(sourceJs, '', undefined, true).default;
   } catch (err) {
     throw new Error(`Evaluate error: ${err}`);
@@ -230,7 +233,7 @@ class ShellBundler {
             const outputCss = assets[`${name}.css`];
             const outputJs = assets[`${name}.js`];
 
-            if (!cssToProps) {
+            if (!cssToProps && outputCss) {
               compilation.assets[`${outputPathName}${name}.css`] = outputCss; // eslint-disable-line
             }
 

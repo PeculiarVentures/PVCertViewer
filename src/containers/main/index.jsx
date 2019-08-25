@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { TextField, Button } from 'lib-react-components';
+import Button from 'lib-react-components/commonjs/components/button';
+import TextField from 'lib-react-components/commonjs/components/text_field';
 import Viewer from '../../components/viewer';
 import CertHelper from '../../utils/cert_helper';
 import query from '../../utils/query';

@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { Typography } from 'lib-react-components';
+import Typography from 'lib-react-components/commonjs/components/typography';
 import EarthIcon from '../../assets/svg/earth_icon';
 import CancelIcon from '../../assets/svg/cancel_icon';
 import AcceptIcon from '../../assets/svg/accept_icon';
@@ -18,7 +18,6 @@ export default class Viewer extends Component {
 
   static contextTypes = {
     intl: PropTypes.object,
-    theme: PropTypes.object,
   };
 
   static defaultProps = {
@@ -332,8 +331,6 @@ export default class Viewer extends Component {
   }
 
   renderExtSAN(extension) {
-    const { theme } = this.context;
-
     return Viewer.renderInfoRow('Value', extension.value.map((p) => {
       const {
         typeValue,
@@ -389,21 +386,21 @@ export default class Viewer extends Component {
               <AcceptIcon
                 className={classNames(
                   s.icon_subtree_type,
-                  theme.fill_success,
+                  'fill_success',
                 )}
               />
             ) : (
               <CancelIcon
                 className={classNames(
                   s.icon_subtree_type,
-                  theme.fill_wrong,
+                  'fill_wrong',
                 )}
               />
             ))}
             <EarthIcon
               className={classNames(
                 s.icon_san_type,
-                theme.fill_black,
+                'fill_black',
               )}
             />
           </span>

@@ -26,7 +26,6 @@ if (shells) {
           title: CONFIG.APP_NAME,
           // initServiceWorker: NODE_ENV !== 'development',
           initServiceWorker: false,
-          initRollbar: NODE_ENV !== 'development' && !!CONFIG.ROLLBAR_API_KEY,
           disableReactDevTools: NODE_ENV !== 'development',
         },
       }));

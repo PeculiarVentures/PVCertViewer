@@ -27,6 +27,3 @@ export const AWS_DEPLOY_REGION = env('AWS_DEPLOY_REGION', 'null') !== 'null' ? e
 
 // ======== Config mode ========
 export const NODE_ENV = env('NODE_ENV');
-
-// ======== Rollbar Key ========
-export const ROLLBAR_API_KEY = env('ROLLBAR_API_KEY', 'null') !== 'null' ? env('ROLLBAR_API_KEY') : '';

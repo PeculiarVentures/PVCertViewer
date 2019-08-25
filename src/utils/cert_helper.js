@@ -2,7 +2,7 @@ import * as asn1js from 'asn1js';
 import Certificate from 'pkijs/build/Certificate';
 import CertificationRequest from 'pkijs/build/CertificationRequest';
 import { Convert } from 'pvtsutils';
-import { regExps } from 'lib-react-components';
+import { regExps } from 'lib-react-components/commonjs/utils/validator';
 import dayJs from 'dayjs';
 import OIDS from '../constants/oids';
 import logList from '../constants/log_list.json';

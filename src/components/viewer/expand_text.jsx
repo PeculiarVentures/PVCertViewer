@@ -1,17 +1,13 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { Button } from 'lib-react-components';
+import Button from 'lib-react-components/commonjs/components/button';
 import ArrowRightIcon from '../../assets/svg/arrow_right';
 import s from './styles/expand_text.sass';
 
 export default class ExpandText extends Component {
   static propTypes = {
     children: PropTypes.node.isRequired,
-  }
-
-  static contextTypes = {
-    theme: PropTypes.object,
   }
 
   state = {
@@ -21,7 +17,6 @@ export default class ExpandText extends Component {
   render() {
     const { children } = this.props;
     const { open } = this.state;
-    const { theme } = this.context;
 
     return (
       <Fragment>
@@ -48,7 +43,7 @@ export default class ExpandText extends Component {
           <ArrowRightIcon
             className={classNames(
               s.icon,
-              theme.fill_white,
+              'fill_white',
             )}
           />
         </Button>

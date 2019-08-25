@@ -1,7 +1,6 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import { CircularProgress, ThemeProvider } from 'lib-react-components';
-import theme from 'lib-react-components/lib/themes/default.css';
+import { CircularProgress } from 'lib-react-components/commonjs/components/progress';
 import Noscript from './noscript';
 import * as CONFIG from '../../../bundler/config';
 import s from './styles/basic.sass';
@@ -15,41 +14,17 @@ const RootShell = props => (
       <title>
         {props.title}
       </title>
-      <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600&amp;subset=cyrillic" rel="stylesheet" />
+      <link rel="preload" href="https://PeculiarVentures.github.io/react-components/assets/css/default.css" as="style" />
+      <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600&display=swap&subset=cyrillic" rel="stylesheet" />
+      <link rel="stylesheet" href="https://PeculiarVentures.github.io/react-components/assets/css/default.css" />
       <style dangerouslySetInnerHTML={{ __html: props.inlineStyles }} />
-      {props.initRollbar && (
-        <Fragment>
-          <script
-            type="text/javascript"
-            charSet="utf-8"
-            dangerouslySetInnerHTML={{
-              __html: `var _rollbarConfig = {
-                accessToken: "${CONFIG.ROLLBAR_API_KEY}",
-                captureUncaught: true,
-                captureUnhandledRejections: true,
-                payload: {
-                    environment: "production"
-                }
-              };`,
-            }}
-          />
-          <script
-            type="text/javascript"
-            charSet="utf-8"
-            async
-            src={`${CONFIG.GIT_URL}/assets/libs/rollbar.js`}
-          />
-        </Fragment>
-      )}
       <noscript>
         <Noscript />
       </noscript>
     </head>
     <body>
       <div className={s.root} id="root">
-        <ThemeProvider theme={theme}>
-          <CircularProgress />
-        </ThemeProvider>
+        <CircularProgress />
       </div>
       {props.disableReactDevTools && (
         <script
@@ -82,7 +57,6 @@ RootShell.propTypes = {
   inlineScripts: PropTypes.arrayOf(PropTypes.string), // eslint-disable-line
   inlineStyles: PropTypes.arrayOf(PropTypes.string),
   initServiceWorker: PropTypes.bool,
-  initRollbar: PropTypes.bool,
   disableReactDevTools: PropTypes.bool,
 };
 
@@ -91,7 +65,6 @@ RootShell.defaultProps = {
   inlineScripts: [],
   inlineStyles: [],
   initServiceWorker: false,
-  initRollbar: false,
   disableReactDevTools: false,
 };
 
