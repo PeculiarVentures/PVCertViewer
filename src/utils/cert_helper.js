@@ -2,13 +2,11 @@ import * as asn1js from 'asn1js';
 import Certificate from 'pkijs/build/Certificate';
 import CertificationRequest from 'pkijs/build/CertificationRequest';
 import { Convert } from 'pvtsutils';
-import { regExps } from 'lib-react-components/commonjs/utils/validator';
 import dayJs from 'dayjs';
+import Hex from './hex';
+import Base64 from './base64';
 import OIDS from '../constants/oids';
 import logList from '../constants/log_list.json';
-
-// RegExp for base64
-const base64RegExp = /([A-Za-z0-9+\/=\s]+)|begin-base64[^\n]+\n([A-Za-z0-9+\/=\s]+)====/; // eslint-disable-line
 
 const flatten = arr => (
   arr.reduce(
@@ -512,16 +510,22 @@ ${string.replace(/(.{64})/g, '$1 \n')}
       let sourceType;
       let value;
 
-      // prepare source value to ArrayBuffer
-      if (regExps.hex.test(source)) {
-        value = Convert.FromHex(source.replace(/(\r|\n|\s)/g, ''));
-        sourceType = 'hex';
-      } else if (base64RegExp.test(source)) {
-        value = Convert.FromBase64(source.replace(new RegExp(regExps.cert, 'g'), ''));
-        sourceType = 'pem';
-      } else {
-        value = Convert.FromBinary(source);
+      if (source instanceof ArrayBuffer) {
+        value = source;
         sourceType = 'der';
+      } else if (source instanceof Uint8Array) {
+        value = Convert.FromBinary(Convert.ToBinary(source));
+        sourceType = 'der';
+      } else if (typeof source === 'string') {
+        if (Hex.re.test(source)) {
+          value = Convert.FromBinary(Convert.ToBinary(Hex.decode(source)));
+          sourceType = 'hex';
+        } else {
+          value = Convert.FromBinary(Convert.ToBinary(Base64.unarmor(source)));
+          sourceType = 'pem';
+        }
+      } else {
+        throw '"source" must be one of: ArrayBuffer, Uint8Array, string';
       }
 
       // decode ArrayBuffer
